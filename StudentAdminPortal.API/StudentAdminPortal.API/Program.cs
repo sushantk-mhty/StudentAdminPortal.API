@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.FileProviders;
 using StudentAdminPortal.API.DataModels;
 using StudentAdminPortal.API.Repositories.Implementation;
 using StudentAdminPortal.API.Repositories.Interface;
@@ -6,6 +7,17 @@ using StudentAdminPortal.API.Repositories.Interface;
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
+
+builder.Services.AddCors((options) =>
+{
+    options.AddPolicy("angularApplication", (builder) =>
+    {
+        builder.WithOrigins("http://localhost:4200")
+        .AllowAnyHeader()
+        .WithMethods("GET", "POST", "PUT", "DELETE")
+        .WithExposedHeaders("*");
+    });
+});
 
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
@@ -29,10 +41,21 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
-
+//app.UseCors(options =>
+//{
+//    options.AllowAnyHeader();
+//    options.AllowAnyOrigin();
+//    options.AllowAnyMethod();
+//});
+app.UseCors("angularApplication");
 app.UseHttpsRedirection();
 
 app.UseAuthorization();
+app.UseStaticFiles(new StaticFileOptions
+{
+    FileProvider = new PhysicalFileProvider(Path.Combine(Directory.GetCurrentDirectory(), "Images")),
+    RequestPath = "/Images"
+});
 
 app.MapControllers();
 
