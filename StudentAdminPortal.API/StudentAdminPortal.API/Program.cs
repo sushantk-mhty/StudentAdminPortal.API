@@ -1,8 +1,10 @@
+using FluentValidation.AspNetCore;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.FileProviders;
 using StudentAdminPortal.API.DataModels;
 using StudentAdminPortal.API.Repositories.Implementation;
 using StudentAdminPortal.API.Repositories.Interface;
+using System.Reflection;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -19,10 +21,19 @@ builder.Services.AddCors((options) =>
     });
 });
 
-builder.Services.AddControllers();
+//builder.Services.AddControllers();
+builder.Services.AddControllers()
+.AddFluentValidation(options =>
+{
+    options.ImplicitlyValidateChildProperties = true;
+    options.ImplicitlyValidateRootCollectionElements = true;
+    options.RegisterValidatorsFromAssembly(Assembly.GetExecutingAssembly());
+});
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+//builder.Services.AddFluentValidation(fv => fv.RegisterValidatorsFromAssemblyContaining<StartupBase>());
+
 builder.Services.AddDbContext<StudentAdminContext>(options =>
 {
     options.UseSqlServer(builder.Configuration.GetConnectionString("StudentAdminConnectionString"));
